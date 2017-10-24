@@ -171,72 +171,6 @@ class Scratch3DroneBlocks {
     }
 
     /**
-     * Update the cached color from the hue, shade and transparency values in the provided
-     * PenState object.
-     * @param {PenState} penState - the pen state to update.
-     * @private
-     */
-    _updatePenColor (penState) {
-        let rgb = Color.hsvToRgb({h: penState.hue * 180 / 100, s: 1, v: 1});
-        const shade = (penState.shade > 100) ? 200 - penState.shade : penState.shade;
-        if (shade < 50) {
-            rgb = Color.mixRgb(Color.RGB_BLACK, rgb, (10 + shade) / 60);
-        } else {
-            rgb = Color.mixRgb(rgb, Color.RGB_WHITE, (shade - 50) / 60);
-        }
-        penState.penAttributes.color4f[0] = rgb.r / 255.0;
-        penState.penAttributes.color4f[1] = rgb.g / 255.0;
-        penState.penAttributes.color4f[2] = rgb.b / 255.0;
-        penState.penAttributes.color4f[3] = this._transparencyToAlpha(penState.transparency);
-    }
-
-    /**
-     * Wrap a pen hue or shade values to the range (0,200).
-     * @param {number} value - the pen hue or shade value to the proper range.
-     * @returns {number} the wrapped value.
-     * @private
-     */
-    _wrapHueOrShade (value) {
-        value = value % 200;
-        if (value < 0) value += 200;
-        return value;
-    }
-
-    /**
-     * Clamp a pen transparency value to the range (0,100).
-     * @param {number} value - the pen transparency value to be clamped.
-     * @returns {number} the clamped value.
-     * @private
-     */
-    _clampTransparency (value) {
-        return MathUtil.clamp(value, 0, 100);
-    }
-
-    /**
-     * Convert an alpha value to a pen transparency value.
-     * Alpha ranges from 0 to 1, where 0 is transparent and 1 is opaque.
-     * Transparency ranges from 0 to 100, where 0 is opaque and 100 is transparent.
-     * @param {number} alpha - the input alpha value.
-     * @returns {number} the transparency value.
-     * @private
-     */
-    _alphaToTransparency (alpha) {
-        return (1.0 - alpha) * 100.0;
-    }
-
-    /**
-     * Convert a pen transparency value to an alpha value.
-     * Alpha ranges from 0 to 1, where 0 is transparent and 1 is opaque.
-     * Transparency ranges from 0 to 100, where 0 is opaque and 100 is transparent.
-     * @param {number} transparency - the input transparency value.
-     * @returns {number} the alpha value.
-     * @private
-     */
-    _transparencyToAlpha (transparency) {
-        return 1.0 - (transparency / 100.0);
-    }
-
-    /**
      * @returns {object} metadata for this extension and its blocks.
      */
     getInfo () {
@@ -254,13 +188,12 @@ class Scratch3DroneBlocks {
                 },
                 {
                     opcode: 'forwardForSecond',
-                    text: 'Forward for [DRONE_ID] seconds',
+                    text: 'Forward for [SECOND] seconds',
                     blockType: BlockType.COMMAND,
                     arguments: {
-                        DRONE_ID: {
-                            type: ArgumentType.STRING,
-                            menu: 'DRONE_ID',
-                            defaultValue: "drone"
+                        SECOND: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
                         }
                     }
                 },
@@ -280,9 +213,14 @@ class Scratch3DroneBlocks {
     }
 
     forwardForSecond (args, util){
-
+        const dx = Cast.toNumber(args.SECOND);
+        console.log(util.target);
+        util.target.setXY(util.target.x + dx, util.target.y);
     }
 
+
+
 }
+
 
 module.exports = Scratch3DroneBlocks;
